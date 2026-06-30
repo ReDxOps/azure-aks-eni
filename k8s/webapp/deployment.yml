@@ -1,3 +1,4 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -18,8 +19,21 @@ spec:
       containers:
         - name: webapp
           image:  nginx:1.31.2-alpine3.23
+          volumeMounts:
+            - name: content
+              mountPath: /usr/share/nginx/html
           ports:
             - containerPort: 80
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          envFrom:
+            - secretRef:
+                name: webapp-secret
           readinessProbe:
             httpGet:
               path: /
@@ -32,3 +46,7 @@ spec:
               port: 80
             initialDelaySeconds: 10
             periodSeconds: 10
+      volumes:
+        - name: content
+          configMap:
+            name: webapp-content         
